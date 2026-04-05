@@ -13,9 +13,9 @@ describe('GridLegend', () => {
     expect(screen.getByText('Weather Legend')).toBeInTheDocument();
   });
 
-  test('renders three legend items', () => {
+  test('renders one legend item per weather type', () => {
     const items = screen.getAllByTestId(/^legend-item-/);
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(Object.keys(WEATHER_STYLES).length);
   });
 
   test('renders "Calm" label', () => {
@@ -24,6 +24,10 @@ describe('GridLegend', () => {
 
   test('renders "Windy" label', () => {
     expect(screen.getByText('Windy')).toBeInTheDocument();
+  });
+
+  test('renders "Dusty" label', () => {
+    expect(screen.getByText('Dusty')).toBeInTheDocument();
   });
 
   test('renders "Stormy" label', () => {
@@ -38,6 +42,11 @@ describe('GridLegend', () => {
   test('windy swatch has the correct background colour', () => {
     const swatch = screen.getByTestId('legend-swatch-windy');
     expect(swatch).toHaveStyle({ backgroundColor: WEATHER_STYLES.windy.background });
+  });
+
+  test('dusty swatch has the correct background colour', () => {
+    const swatch = screen.getByTestId('legend-swatch-dusty');
+    expect(swatch).toHaveStyle({ backgroundColor: WEATHER_STYLES.dusty.background });
   });
 
   test('stormy swatch has the correct background colour', () => {

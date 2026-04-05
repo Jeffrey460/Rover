@@ -160,25 +160,25 @@ describe('App CELL_UPDATE and staleness', () => {
     expect(screen.getByText(/mars orbital climate/i)).toBeInTheDocument();
   });
 
-  test('stale cells are updated locally after 10 seconds', () => {
+  test('stale cells are updated locally after 30 seconds', () => {
     setupGrid();
-    // advance past 10 seconds without any CELL_UPDATE messages
-    act(() => { jest.advanceTimersByTime(11000); });
+    // advance past 30 seconds without any CELL_UPDATE messages
+    act(() => { jest.advanceTimersByTime(31000); });
     // All cells should have been locally randomised — weatherMeta source should be 'local'
     expect(screen.getByText(/local/i)).toBeInTheDocument();
   });
 
-  test('a cell updated via CELL_UPDATE does not go stale for another 10 seconds', () => {
+  test('a cell updated via CELL_UPDATE does not go stale for another 30 seconds', () => {
     setupGrid();
     const onMessage = connectWebSocket.mock.calls[0][0];
 
-    // Update cell 0-0 to stormy just before the 10s mark
-    act(() => { jest.advanceTimersByTime(9000); });
+    // Update cell 0-0 to stormy just before the 30s mark
+    act(() => { jest.advanceTimersByTime(29000); });
     act(() => {
       onMessage({ type: 'CELL_UPDATE', cell: { id: '0-0', weather: 'stormy' } });
     });
 
-    // At 10s the other cells will go stale but 0-0 should still be stormy
+    // At 30s the other cells will go stale but 0-0 should still be stormy
     act(() => { jest.advanceTimersByTime(1500); });
     expect(screen.getByTestId('cell-0-0')).toHaveStyle({ backgroundColor: '#6c6c6c' });
   });

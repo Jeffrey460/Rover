@@ -17,6 +17,9 @@ const marsResponse = {
     cells: [
       { id: '0-0', weather: 'windy' },
       { id: '1-0', weather: 'stormy' }
+    ],
+    quadrants: [
+      { startX: 0, startY: 0, endX: 1, endY: 0 }
     ]
   }
 }
@@ -77,12 +80,31 @@ describe('handleGridCreated', () => {
 
   test('itemPresent defaults to false for cells not found in the original grid', async () => {
     const marsResponseWithExtra = {
-      data: { cells: [{ id: '9-9', weather: 'calm' }] }
+      data: {
+        cells: [{ id: '9-9', weather: 'calm' }],
+        quadrants: []
+      }
     }
     axios.post.mockResolvedValue(marsResponseWithExtra)
     await handleGridCreated(sampleGrid, broadcast, sendToClient, 'http://mars:8080', 'http://localhost:5000')
     const { cells } = broadcast.mock.calls[0][0]
     expect(cells[0].itemPresent).toBe(false)
+  })
+
+  test('broadcasts quadrants from the Mars response in WEATHER_UPDATE', async () => {
+    axios.post.mockResolvedValue(marsResponse)
+    await handleGridCreated(sampleGrid, broadcast, sendToClient, 'http://mars:8080', 'http://localhost:5000')
+    expect(broadcast).toHaveBeenCalledWith(
+      expect.objectContaining({ quadrants: marsResponse.data.quadrants })
+    )
+  })
+
+  test('broadcasts empty quadrants array when Mars response has no quadrants field', async () => {
+    const responseWithoutQuadrants = { data: { cells: [{ id: '0-0', weather: 'calm' }] } }
+    axios.post.mockResolvedValue(responseWithoutQuadrants)
+    await handleGridCreated(sampleGrid, broadcast, sendToClient, 'http://mars:8080', 'http://localhost:5000')
+    const msg = broadcast.mock.calls[0][0]
+    expect(msg.quadrants).toEqual([])
   })
 
   test('calls sendToClient with type ERROR when the Mars call fails', async () => {

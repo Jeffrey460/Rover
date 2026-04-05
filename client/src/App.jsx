@@ -14,6 +14,7 @@ function formatAge(ts) {
 
 function App() {
   const [grid, setGrid] = useState(null);
+  const [quadrants, setQuadrants] = useState(null);
   const [serverError, setServerError] = useState(null);
   const [wsStatus, setWsStatus] = useState('connecting');
   const [weatherMeta, setWeatherMeta] = useState(null);
@@ -31,7 +32,7 @@ function App() {
         if (!prev) return prev
         let changed = false
         const cells = prev.cells.map((cell) => {
-          if (now - cell.lastUpdatedAt > 10000) {
+          if (now - cell.lastUpdatedAt > 30000) {
             changed = true
             return { ...cell, weather: randomWeather(), lastUpdatedAt: now }
           }
@@ -49,7 +50,7 @@ function App() {
     connectWebSocket(
       (message) => {
         if (message.type === 'WEATHER_UPDATE') {
-          handleWeatherUpdate(message.cells);
+          handleWeatherUpdate(message.cells, message.quadrants);
         }
         if (message.type === 'ERROR') {
           handleServerError(message.message);
@@ -65,6 +66,7 @@ function App() {
   const handleGridCreate = (width, height) => {
     const cells = createGrid(width, height).map(cell => ({ ...cell, lastUpdatedAt: Date.now() }));
     setGrid({ width, height, cells });
+    setQuadrants(null);
     setWeatherMeta({ source: 'local', updatedAt: Date.now() });
     sendMessage({
       type: 'GRID_CREATED',
@@ -72,7 +74,7 @@ function App() {
     });
   };
 
-  const handleWeatherUpdate = (updatedCells) => {
+  const handleWeatherUpdate = (updatedCells, updatedQuadrants) => {
     setGrid((prev) => {
       if (!prev) return prev;
       const weatherMap = Object.fromEntries(updatedCells.map((c) => [c.id, c.weather]));
@@ -86,6 +88,7 @@ function App() {
       };
     });
     setWeatherMeta({ source: 'mars orbital climate', updatedAt: Date.now() });
+    if (updatedQuadrants) setQuadrants(updatedQuadrants);
   };
 
   const handleCellUpdate = (updatedCell) => {
@@ -125,7 +128,7 @@ function App() {
       </header>
       <main className="App-main">
         <GridSetup onGridCreate={handleGridCreate} />
-        {grid && <Grid width={grid.width} height={grid.height} cells={grid.cells} />}
+        {grid && <Grid width={grid.width} height={grid.height} cells={grid.cells} quadrants={quadrants} />}
         {weatherMeta && (
           <p className="weather-meta">
             Weather last updated {formatAge(weatherMeta.updatedAt)} — source: <strong>{weatherMeta.source}</strong>

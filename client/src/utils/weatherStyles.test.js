@@ -1,11 +1,11 @@
 import { WEATHER_STYLES } from './weatherStyles';
 
 describe('WEATHER_STYLES', () => {
-  test('has exactly three keys: calm, windy, stormy', () => {
-    expect(Object.keys(WEATHER_STYLES)).toEqual(['calm', 'windy', 'stormy']);
+  test('has exactly four keys: calm, dusty, windy, stormy', () => {
+    expect(Object.keys(WEATHER_STYLES)).toEqual(['calm', 'dusty', 'windy', 'stormy']);
   });
 
-  test.each([['calm'], ['windy'], ['stormy']])(
+  test.each([['calm'], ['dusty'], ['windy'], ['stormy']])(
     '%s entry has a background and a label property',
     (key) => {
       expect(WEATHER_STYLES[key]).toHaveProperty('background');
@@ -19,6 +19,10 @@ describe('WEATHER_STYLES', () => {
 
   test('windy background is #fff3cd', () => {
     expect(WEATHER_STYLES.windy.background).toBe('#fff3cd');
+  });
+
+  test('dusty background is #C97A30', () => {
+    expect(WEATHER_STYLES.dusty.background).toBe('#C97A30');
   });
 
   test('stormy background is #6c6c6c', () => {

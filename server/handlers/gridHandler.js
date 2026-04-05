@@ -10,6 +10,7 @@ async function handleGridCreated(grid, broadcast, sendToClient, marsUrl, callbac
     })
 
     const marsCells = response.data.cells
+    const marsQuadrants = response.data.quadrants || []
 
     const cellMap = Object.fromEntries(
       grid.cells.map((c) => [c.id, c.itemPresent])
@@ -23,7 +24,8 @@ async function handleGridCreated(grid, broadcast, sendToClient, marsUrl, callbac
 
     broadcast({
       type: 'WEATHER_UPDATE',
-      cells: mergedCells
+      cells: mergedCells,
+      quadrants: marsQuadrants
     })
 
   } catch (err) {

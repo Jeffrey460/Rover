@@ -1,4 +1,4 @@
-const WEATHER_VALUES = ['calm', 'windy', 'stormy'];
+const WEATHER_VALUES = ['calm', 'dusty', 'windy'];
 
 export function randomWeather() {
   return WEATHER_VALUES[Math.floor(Math.random() * WEATHER_VALUES.length)];

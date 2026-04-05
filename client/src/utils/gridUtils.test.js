@@ -1,11 +1,17 @@
 import { randomWeather, createGrid } from './gridUtils';
 
-const VALID_WEATHER = ['calm', 'windy', 'stormy'];
+const VALID_WEATHER = ['calm', 'dusty', 'windy'];
 
 describe('randomWeather', () => {
   test('returns only valid weather values', () => {
     for (let i = 0; i < 100; i++) {
       expect(VALID_WEATHER).toContain(randomWeather());
+    }
+  });
+
+  test('never returns stormy — stormy is a special case only from Mars', () => {
+    for (let i = 0; i < 200; i++) {
+      expect(randomWeather()).not.toBe('stormy');
     }
   });
 });
