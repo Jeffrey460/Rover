@@ -3,11 +3,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import GridSetup from './GridSetup';
 
-// ── Helper ────────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 const setup = (props = {}) => render(<GridSetup {...props} />);
 
 const getInput = () => screen.getByLabelText(/grid size input/i);
-const getButton = () => screen.getByRole('button', { name: /set grid/i });
+const getButton = () => screen.getByRole('button', { name: /generate grid/i });
 
 const submit = (value) => {
   if (value !== undefined) {
@@ -21,9 +21,7 @@ describe('GridSetup', () => {
   describe('Rendering', () => {
     test('renders the prompt heading', () => {
       setup();
-      expect(
-        screen.getByText(/how big would you like your grid to be\?/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/how big would you like your grid to be\?/i)).toBeInTheDocument();
     });
 
     test('renders the format hint', () => {
@@ -36,48 +34,50 @@ describe('GridSetup', () => {
       expect(getInput()).toBeInTheDocument();
     });
 
-    test('renders the submit button', () => {
+    test('renders the Generate Grid button', () => {
       setup();
       expect(getButton()).toBeInTheDocument();
     });
 
-    test('does not show an error or confirmation on initial render', () => {
+    test('does not show an error on initial render', () => {
       setup();
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    test('does not show a confirmation message', () => {
+      setup();
       expect(screen.queryByTestId('confirmation')).not.toBeInTheDocument();
     });
   });
 
   describe('Valid input', () => {
-    test('shows confirmation for "2 by 3"', () => {
-      setup();
+    test('calls onGridCreate with correct width and height for "2 by 3"', () => {
+      const onGridCreate = jest.fn();
+      setup({ onGridCreate });
       submit('2 by 3');
-      expect(screen.getByTestId('confirmation')).toHaveTextContent('Grid set to 2 × 3');
+      expect(onGridCreate).toHaveBeenCalledWith(2, 3);
     });
 
-    test('shows confirmation for "5 by 5"', () => {
-      setup();
+    test('calls onGridCreate with correct width and height for "5 by 5"', () => {
+      const onGridCreate = jest.fn();
+      setup({ onGridCreate });
       submit('5 by 5');
-      expect(screen.getByTestId('confirmation')).toHaveTextContent('Grid set to 5 × 5');
+      expect(onGridCreate).toHaveBeenCalledWith(5, 5);
     });
 
-    test('shows confirmation for "10 by 1"', () => {
-      setup();
-      submit('10 by 1');
-      expect(screen.getByTestId('confirmation')).toHaveTextContent('Grid set to 10 × 1');
+    test('calls onGridCreate with numbers not strings', () => {
+      const onGridCreate = jest.fn();
+      setup({ onGridCreate });
+      submit('3 by 7');
+      const [w, h] = onGridCreate.mock.calls[0];
+      expect(typeof w).toBe('number');
+      expect(typeof h).toBe('number');
     });
 
-    test('does not show an error on valid submission', () => {
+    test('does not show an error on valid input', () => {
       setup();
       submit('4 by 6');
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    });
-
-    test('calls onGridSet with correct width and height', () => {
-      const onGridSet = jest.fn();
-      setup({ onGridSet });
-      submit('3 by 7');
-      expect(onGridSet).toHaveBeenCalledWith(3, 7);
     });
   });
 
@@ -86,14 +86,12 @@ describe('GridSetup', () => {
       setup();
       submit('');
       expect(screen.getByRole('alert')).toBeInTheDocument();
-      expect(screen.queryByTestId('confirmation')).not.toBeInTheDocument();
     });
 
     test('shows an error for "abc by 3"', () => {
       setup();
       submit('abc by 3');
       expect(screen.getByRole('alert')).toBeInTheDocument();
-      expect(screen.queryByTestId('confirmation')).not.toBeInTheDocument();
     });
 
     test('shows an error for "2 by abc"', () => {
@@ -102,7 +100,7 @@ describe('GridSetup', () => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
     });
 
-    test('shows an error for just a number with no format ("5")', () => {
+    test('shows an error for just a number ("5")', () => {
       setup();
       submit('5');
       expect(screen.getByRole('alert')).toBeInTheDocument();
@@ -114,24 +112,21 @@ describe('GridSetup', () => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
     });
 
-    test('does not call onGridSet on invalid input', () => {
-      const onGridSet = jest.fn();
-      setup({ onGridSet });
+    test('does not call onGridCreate on invalid input', () => {
+      const onGridCreate = jest.fn();
+      setup({ onGridCreate });
       submit('bad input');
-      expect(onGridSet).not.toHaveBeenCalled();
+      expect(onGridCreate).not.toHaveBeenCalled();
     });
   });
 
-  describe('Error clears on valid submission after an error', () => {
-    test('error disappears when a valid value is submitted after an invalid one', () => {
+  describe('Error clears on valid input after an error', () => {
+    test('error disappears when valid input follows invalid input', () => {
       setup();
       submit('bad');
       expect(screen.getByRole('alert')).toBeInTheDocument();
-
       submit('3 by 3');
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-      expect(screen.getByTestId('confirmation')).toBeInTheDocument();
     });
   });
 });
-
