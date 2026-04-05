@@ -1,0 +1,16 @@
+{
+  "name": "rover",
+  "version": "1.0.0",
+  "description": "Mars Rover Grid Simulator – full-stack monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client start\"",
+    "test:server": "npm --prefix server test",
+    "test:client": "npm --prefix client test -- --watchAll=false",
+    "test": "npm run test:server && npm run test:client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+
